@@ -56,7 +56,7 @@ class _MyHomePageState extends State<MyHomePage> {
       return Container();
     }
 
-    return buildPiece(1);
+    return buildPiece(14);
 
     return GridView.builder(
       itemCount: 16,
@@ -87,17 +87,31 @@ class _MyHomePageState extends State<MyHomePage> {
     return Container(
       color: Colors.white,
       child: Align(
-        alignment: Alignment.topLeft,
+        alignment: Alignment.center,
         child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.green),
+          ),
           width: width / 4,
           height: width / 4,
-          child: Container(
-            decoration: BoxDecoration(border: Border.all(color: Colors.green)),
-            width: width,
-            height: width * 1.33,
-            child: ClipRect(
-              clipper: RectClipper(i, width / 4),
-              child: CameraPreview(controller),
+          child: SizedBox(
+            width: width / 4,
+            height: width / 4,
+            child: OverflowBox(
+              alignment: Alignment((-1 + 2 * ((i % 4) / 3).toDouble()),
+                  (-1 + 2 * ((i ~/ 4) / 3)).toDouble()),
+              maxWidth: double.infinity,
+              maxHeight: double.infinity,
+              child: Container(
+                decoration:
+                    BoxDecoration(border: Border.all(color: Colors.blue)),
+                width: width,
+                height: width,
+                child: ClipRect(
+                  clipper: RectClipper(i, width / 4),
+                  child: CameraPreview(controller),
+                ),
+              ),
             ),
           ),
         ),
