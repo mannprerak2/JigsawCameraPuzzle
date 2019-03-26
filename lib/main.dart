@@ -52,11 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    if (!controller.value.isInitialized) {
-      return Container();
-    }
-
-    return buildPiece(14);
+    if (!controller.value.isInitialized) return Container();
 
     return GridView.builder(
       itemCount: 16,
@@ -68,30 +64,12 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  // SizedBox buildPiece(int i) {
-  //   return SizedBox(
-  //     width: 100,
-  //     height: 100,
-  //     child: Container(
-  //       width: width,
-  //       height: width,
-  //       color: Colors.green,
-  //       child: ClipRect(
-  //           clipper: RectClipper(i, width / 4),
-  //           child: CameraPreview(controller)),
-  //     ),
-  //   );
-  // }
-
   Widget buildPiece(int i) {
     return Container(
       color: Colors.white,
       child: Align(
         alignment: Alignment.center,
         child: Container(
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.green),
-          ),
           width: width / 4,
           height: width / 4,
           child: SizedBox(
@@ -103,8 +81,6 @@ class _MyHomePageState extends State<MyHomePage> {
               maxWidth: double.infinity,
               maxHeight: double.infinity,
               child: Container(
-                decoration:
-                    BoxDecoration(border: Border.all(color: Colors.blue)),
                 width: width,
                 height: width,
                 child: ClipRect(
