@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'package:flutter/rendering.dart';
 
 List<CameraDescription> cameras;
 
@@ -55,41 +56,54 @@ class _MyHomePageState extends State<MyHomePage> {
       return Container();
     }
 
-    return buildPiece(2);
+    return buildPiece(1);
 
-    // return GridView.builder(
-    //   itemCount: 16,
-    //   gridDelegate:
-    //       SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
-    //   itemBuilder: (context, i) {
-    //     return buildPiece(0);
-    //   },
-    // );
-  }
-
-  Container buildPiece(int i) {
-    return Container(
-      child: ClipRect(
-          clipper: RectClipper(i, width / 4),
-          child: CameraPreview(controller)),
+    return GridView.builder(
+      itemCount: 16,
+      gridDelegate:
+          SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
+      itemBuilder: (context, i) {
+        return buildPiece(i);
+      },
     );
   }
 
-  // Container buildPiece(int i) {
-  //   return Container(
-  //     child: OverflowBox(
-  //       maxWidth: width / 4,
-  //       maxHeight: width / 4,
-  //       alignment: FractionalOffset((i % 4) * width / 4, (i ~/ 4) * width / 4),
+  // SizedBox buildPiece(int i) {
+  //   return SizedBox(
+  //     width: 100,
+  //     height: 100,
+  //     child: Container(
+  //       width: width,
+  //       height: width,
+  //       color: Colors.green,
   //       child: ClipRect(
-  //         clipper: RectClipper(i, width / 4),
-  //         child: Container(
-  //             child: AspectRatio(
-  //                 aspectRatio: 3 / 4, child: CameraPreview(controller))),
-  //       ),
+  //           clipper: RectClipper(i, width / 4),
+  //           child: CameraPreview(controller)),
   //     ),
   //   );
   // }
+
+  Widget buildPiece(int i) {
+    return Container(
+      color: Colors.white,
+      child: Align(
+        alignment: Alignment.topLeft,
+        child: Container(
+          width: width / 4,
+          height: width / 4,
+          child: Container(
+            decoration: BoxDecoration(border: Border.all(color: Colors.green)),
+            width: width,
+            height: width * 1.33,
+            child: ClipRect(
+              clipper: RectClipper(i, width / 4),
+              child: CameraPreview(controller),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class RectClipper extends CustomClipper<Rect> {
