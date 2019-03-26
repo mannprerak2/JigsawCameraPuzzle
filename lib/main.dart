@@ -31,6 +31,9 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   CameraController controller;
   double width;
+  List<int> blocks = List<int>.generate(16, (i) => i)..shuffle();
+  int swap = -1;
+
   @override
   void initState() {
     super.initState();
@@ -59,7 +62,7 @@ class _MyHomePageState extends State<MyHomePage> {
       gridDelegate:
           SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
       itemBuilder: (context, i) {
-        return buildPiece((i) % 16);
+        return buildPiece(blocks[i]);
       },
     );
   }
@@ -67,7 +70,21 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget buildPiece(int i) {
     return GestureDetector(
       onTap: () {
-        print(i);
+        if (swap == -1) {
+          swap = blocks.indexOf(i);
+          return;
+        }
+        print("swap");
+
+        int t = blocks[swap];
+        blocks[blocks.indexOf(i)] = t;
+        blocks[swap] = i;
+        swap = -1;
+
+        setState(() {});
+      },
+      onHorizontalDragEnd: (DragEndDetails drag) {
+        if (drag.primaryVelocity > 0) {}
       },
       child: OverflowBox(
         alignment: Alignment((-1 + 2 * ((i % 4) / 3).toDouble()),
