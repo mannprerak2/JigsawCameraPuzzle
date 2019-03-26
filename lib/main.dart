@@ -59,36 +59,27 @@ class _MyHomePageState extends State<MyHomePage> {
       gridDelegate:
           SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
       itemBuilder: (context, i) {
-        return buildPiece(i);
+        return buildPiece((i) % 16);
       },
     );
   }
 
   Widget buildPiece(int i) {
-    return Container(
-      color: Colors.white,
-      child: Align(
-        alignment: Alignment.center,
+    return GestureDetector(
+      onTap: () {
+        print(i);
+      },
+      child: OverflowBox(
+        alignment: Alignment((-1 + 2 * ((i % 4) / 3).toDouble()),
+            (-1 + 2 * ((i ~/ 4) / 3)).toDouble()),
+        maxWidth: double.infinity,
+        maxHeight: double.infinity,
         child: Container(
-          width: width / 4,
-          height: width / 4,
-          child: SizedBox(
-            width: width / 4,
-            height: width / 4,
-            child: OverflowBox(
-              alignment: Alignment((-1 + 2 * ((i % 4) / 3).toDouble()),
-                  (-1 + 2 * ((i ~/ 4) / 3)).toDouble()),
-              maxWidth: double.infinity,
-              maxHeight: double.infinity,
-              child: Container(
-                width: width,
-                height: width,
-                child: ClipRect(
-                  clipper: RectClipper(i, width / 4),
-                  child: CameraPreview(controller),
-                ),
-              ),
-            ),
+          width: width,
+          height: width,
+          child: ClipRect(
+            clipper: RectClipper(i, width / 4),
+            child: CameraPreview(controller),
           ),
         ),
       ),
