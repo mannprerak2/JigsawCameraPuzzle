@@ -6,31 +6,30 @@ double r;
 
 Future<void> main() async {
   cams = await availableCameras();
-  runApp(App());
+  runApp(A());
 }
 
-class App extends StatelessWidget {
+class A extends StatelessWidget {
   @override
   Widget build(_) {
     return MaterialApp(
       theme: ThemeData(iconTheme: IconThemeData(color: Colors.white)),
-      home: MPg(),
+      home: M(),
     );
   }
 }
 
-class MPg extends StatefulWidget {
-  MPg({Key key}) : super(key: key);
+class M extends StatefulWidget {
+  M({Key key}) : super(key: key);
   @override
-  _MPgState createState() => _MPgState();
+  _MState createState() => _MState();
 }
 
-class _MPgState extends State<MPg> with TickerProviderStateMixin {
-  CameraController contr;
+class _MState extends State<M> with TickerProviderStateMixin {
+  CameraController c;
   double w;
   var tl = List<int>.generate(16, (i) => i)..shuffle();
   int step = 0;
-
   var tw = List<Tween>();
   var an = List<Animation>();
   var anct = List<AnimationController>();
@@ -38,25 +37,24 @@ class _MPgState extends State<MPg> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    contr = CameraController(cams[1], ResolutionPreset.medium);
-    contr.initialize().then((_) {
-      if (!mounted) {
-        return;
-      }
+    c = CameraController(cams[1], ResolutionPreset.medium);
+    c.initialize().then((_) {
+      if (!mounted) return;
+
       w = MediaQuery.of(context).size.width;
-      r = 1 / contr.value.aspectRatio;
+      r = 1 / c.value.aspectRatio;
       step = 0;
       setState(() {});
     });
     for (int i = 0; i < 16; i++) {
       anct.add(AnimationController(
         vsync: this,
-        duration: const Duration(milliseconds: 70),
+        duration: const Duration(milliseconds: 50),
       ));
-      tw.add(Tween<Offset>(begin: Offset.zero, end: Offset(0, 1)));
+      tw.add(Tween<Offset>(begin: Offset.zero));
       an.add(tw[i].animate(anct[i]));
-      an[i].addStatusListener((status) {
-        if (status == AnimationStatus.completed) {
+      an[i].addStatusListener((s) {
+        if (s == AnimationStatus.completed) {
           setState(() {
             anct[i].reset();
             step = 1;
@@ -69,7 +67,7 @@ class _MPgState extends State<MPg> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    contr?.dispose();
+    c?.dispose();
     super.dispose();
   }
 
@@ -88,7 +86,7 @@ class _MPgState extends State<MPg> with TickerProviderStateMixin {
 
   @override
   Widget build(context) {
-    if (!contr.value.isInitialized) return Container();
+    if (!c.value.isInitialized) return Container();
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -107,16 +105,16 @@ class _MPgState extends State<MPg> with TickerProviderStateMixin {
             ),
           ),
           Container(
-              padding: EdgeInsetsDirectional.only(bottom: 25), child: btmBar())
+              padding: EdgeInsetsDirectional.only(bottom: 25), child: disp())
         ],
       ),
     );
   }
 
-  Widget btmBar() {
+  Widget disp() {
     if (step == 0) {
       return Text(
-        "Solve the jigsaw by swiping the tiles\n",
+        "Solve the jigsaw by swiping the tiles",
         textAlign: TextAlign.center,
         style: TextStyle(color: Colors.white, fontSize: 25),
       );
@@ -150,7 +148,7 @@ class _MPgState extends State<MPg> with TickerProviderStateMixin {
       );
     } else if (step == 2) {
       return Text(
-        ":D Congrats :D\n",
+        "Good Job",
         textAlign: TextAlign.center,
         style: TextStyle(color: Colors.white, fontSize: 25),
       );
@@ -158,45 +156,39 @@ class _MPgState extends State<MPg> with TickerProviderStateMixin {
     return Container();
   }
 
-  void onDragEnd(d, i, swap) {
+  void onDragEnd(d, i, s) {
     if (d.primaryVelocity > 0)
-      swap *= 1;
+      s *= 1;
     else
-      swap *= -1;
+      s *= -1;
     try {
       int idx = tl.indexOf(i);
-      tl[idx] = tl[idx + swap];
-      tl[idx + swap] = i;
+      tl[idx] = tl[idx + s];
+      tl[idx + s] = i;
 
-      if (swap == 1 || swap == -1) {
-        tw[idx].end = Offset(swap / 1, 0);
+      if (s == 1 || s == -1) {
+        tw[idx].end = Offset(s / 1, 0);
         anct[idx].forward();
-        tw[idx + swap].end = Offset(-swap / 1, 0);
-        anct[idx + swap].forward();
-      } else if (swap == 4 || swap == -4) {
-        tw[idx].end = Offset(0, swap / 4);
+        tw[idx + s].end = Offset(-s / 1, 0);
+        anct[idx + s].forward();
+      } else if (s == 4 || s == -4) {
+        tw[idx].end = Offset(0, s / 4);
         anct[idx].forward();
-        tw[idx + swap].end = Offset(0, -swap / 4);
-        anct[idx + swap].forward();
+        tw[idx + s].end = Offset(0, -s / 4);
+        anct[idx + s].forward();
       }
-    } catch (e) {
-      print(e.toString());
-    }
+    } catch (e) {}
   }
 
   Widget tile(int i) {
     return SlideTransition(
       position: an[tl.indexOf(i)],
       child: GestureDetector(
-        onVerticalDragEnd: (d) {
-          onDragEnd(d, i, 4);
-        },
-        onHorizontalDragEnd: (d) {
-          onDragEnd(d, i, 1);
-        },
+        onVerticalDragEnd: (d) => onDragEnd(d, i, 4),
+        onHorizontalDragEnd: (d) => onDragEnd(d, i, 1),
         child: OverflowBox(
-          alignment: Alignment((-1 + 2 * ((i % 4) / 3).toDouble()),
-              (-1 + 2 * ((i ~/ 4) / 3)).toDouble()),
+          alignment:
+              Alignment((-1 + 2 * ((i % 4) / 3)), (-1 + 2 * ((i ~/ 4) / 3))),
           maxWidth: double.infinity,
           maxHeight: double.infinity,
           child: Container(
@@ -204,7 +196,7 @@ class _MPgState extends State<MPg> with TickerProviderStateMixin {
             height: w * r,
             child: ClipRect(
               clipper: MClip(i, w / 4),
-              child: CameraPreview(contr),
+              child: CameraPreview(c),
             ),
           ),
         ),

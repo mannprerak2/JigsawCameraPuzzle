@@ -1,16 +1,19 @@
-# live_jigsaw_camera
+# Sliding Jigsaw Camera Puzzle
 
-A new Flutter project.
+A sliding jigsaw puzzle with live camera image instead 
+##### <3 made with Flutter <3 
 
-## Getting Started
+## Instructions
 
-This project is a starting point for a Flutter application.
+App was tested on Android but should probably work on iOS as well.
 
-A few resources to get you started if this is your first Flutter project:
+## Running the App
 
-- [Lab: Write your first Flutter app](https://flutter.io/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.io/docs/cookbook)
+In your terminal
+navigate to project directory, connect your phone in USB debugging mode, set to File transfer and type
+```
+flutter run --release
+```
+### Dart code Byte count = 5100 bytes
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.io/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+<img src="https://upload.wikimedia.org/wikipedia/commons/1/17/Google-flutter-logo.png">
