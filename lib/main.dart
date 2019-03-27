@@ -13,29 +13,27 @@ class App extends StatelessWidget {
   @override
   Widget build(_) {
     return MaterialApp(
-      theme: ThemeData(
-          primarySwatch: Colors.blue,
-          iconTheme: IconThemeData(color: Colors.white)),
-      home: MPage(),
+      theme: ThemeData(iconTheme: IconThemeData(color: Colors.white)),
+      home: MPg(),
     );
   }
 }
 
-class MPage extends StatefulWidget {
-  MPage({Key key}) : super(key: key);
+class MPg extends StatefulWidget {
+  MPg({Key key}) : super(key: key);
   @override
-  _MPageState createState() => _MPageState();
+  _MPgState createState() => _MPgState();
 }
 
-class _MPageState extends State<MPage> with TickerProviderStateMixin {
+class _MPgState extends State<MPg> with TickerProviderStateMixin {
   CameraController contr;
-  static double w;
-  var tiles = List<int>.generate(16, (i) => i)..shuffle();
+  double w;
+  var tl = List<int>.generate(16, (i) => i)..shuffle();
   int step = 0;
 
-  List<Tween> tw = List();
-  List<Animation> an = List();
-  List<AnimationController> anct = List();
+  var tw = List<Tween>();
+  var an = List<Animation>();
+  var anct = List<AnimationController>();
 
   @override
   void initState() {
@@ -53,11 +51,11 @@ class _MPageState extends State<MPage> with TickerProviderStateMixin {
     for (int i = 0; i < 16; i++) {
       anct.add(AnimationController(
         vsync: this,
-        duration: const Duration(milliseconds: 100),
+        duration: const Duration(milliseconds: 70),
       ));
       tw.add(Tween<Offset>(begin: Offset.zero, end: Offset(0, 1)));
       an.add(tw[i].animate(anct[i]));
-      an[i].addStatusListener((AnimationStatus status) {
+      an[i].addStatusListener((status) {
         if (status == AnimationStatus.completed) {
           setState(() {
             anct[i].reset();
@@ -76,13 +74,13 @@ class _MPageState extends State<MPage> with TickerProviderStateMixin {
   }
 
   void checkEnd() async {
-    bool sorted = true;
-    for (int i = 1; i < tiles.length; i++) {
-      if (tiles[i - 1] < tiles[i]) continue;
-      sorted = false;
+    bool s = true;
+    for (int i = 1; i < tl.length; i++) {
+      if (tl[i - 1] < tl[i]) continue;
+      s = false;
       break;
     }
-    if (sorted)
+    if (s)
       setState(() {
         step = 2;
       });
@@ -104,7 +102,7 @@ class _MPageState extends State<MPage> with TickerProviderStateMixin {
                 childAspectRatio: 1 / r,
               ),
               itemBuilder: (c, i) {
-                return tile(tiles[i]);
+                return tile(tl[i]);
               },
             ),
           ),
@@ -118,7 +116,7 @@ class _MPageState extends State<MPage> with TickerProviderStateMixin {
   Widget btmBar() {
     if (step == 0) {
       return Text(
-        "Oops... The camera is broken\n Fix it by swiping on tiles\n",
+        "Solve the jigsaw by swiping the tiles\n",
         textAlign: TextAlign.center,
         style: TextStyle(color: Colors.white, fontSize: 25),
       );
@@ -133,7 +131,7 @@ class _MPageState extends State<MPage> with TickerProviderStateMixin {
             iconSize: 50,
             onPressed: () {
               setState(() {
-                tiles.shuffle();
+                tl.shuffle();
               });
             },
           ),
@@ -152,7 +150,7 @@ class _MPageState extends State<MPage> with TickerProviderStateMixin {
       );
     } else if (step == 2) {
       return Text(
-        "COngratulations!!\n",
+        ":D Congrats :D\n",
         textAlign: TextAlign.center,
         style: TextStyle(color: Colors.white, fontSize: 25),
       );
@@ -160,53 +158,27 @@ class _MPageState extends State<MPage> with TickerProviderStateMixin {
     return Container();
   }
 
-  void onDragEnd(DragEndDetails d, i, swap) {
+  void onDragEnd(d, i, swap) {
     if (d.primaryVelocity > 0)
       swap *= 1;
     else
       swap *= -1;
-
     try {
-      int idx = tiles.indexOf(i);
-      tiles[idx] = tiles[idx + swap];
-      tiles[idx + swap] = i;
+      int idx = tl.indexOf(i);
+      tl[idx] = tl[idx + swap];
+      tl[idx + swap] = i;
 
-      switch (swap) {
-        case 1:
-          tw[idx].end = Offset(1, 0);
-          anct[idx].forward();
-          tw[idx + 1].end = Offset(-1, 0);
-          anct[idx + 1].forward();
-          break;
-        case -1:
-          tw[idx].end = Offset(-1, 0);
-          anct[idx].forward();
-          tw[idx - 1].end = Offset(1, 0);
-          anct[idx - 1].forward();
-          break;
-        case 4:
-          tw[idx].end = Offset(0, 1);
-          anct[idx].forward();
-          tw[idx + 4].end = Offset(0, -1);
-          anct[idx + 4].forward();
-          break;
-        case -4:
-          tw[idx].end = Offset(0, -1);
-          anct[idx].forward();
-          tw[idx - 4].end = Offset(0, 1);
-          anct[idx - 4].forward();
-          break;
-
-        //set state called after animation is completed
+      if (swap == 1 || swap == -1) {
+        tw[idx].end = Offset(swap / 1, 0);
+        anct[idx].forward();
+        tw[idx + swap].end = Offset(-swap / 1, 0);
+        anct[idx + swap].forward();
+      } else if (swap == 4 || swap == -4) {
+        tw[idx].end = Offset(0, swap / 4);
+        anct[idx].forward();
+        tw[idx + swap].end = Offset(0, -swap / 4);
+        anct[idx + swap].forward();
       }
-      //swipe the animations as well
-      // var t1 = _switchTween[idx];
-      // _switchTween[idx] = _switchTween[idx + swap];
-      // _switchTween[idx + swap] = t1;
-
-      // var t2 = _switchAnimCont[idx];
-      // _switchAnimCont[idx] = _switchAnimCont[idx + swap];
-      // _switchAnimCont[idx + swap] = t2;
     } catch (e) {
       print(e.toString());
     }
@@ -214,7 +186,7 @@ class _MPageState extends State<MPage> with TickerProviderStateMixin {
 
   Widget tile(int i) {
     return SlideTransition(
-      position: an[tiles.indexOf(i)],
+      position: an[tl.indexOf(i)],
       child: GestureDetector(
         onVerticalDragEnd: (d) {
           onDragEnd(d, i, 4);
@@ -242,7 +214,7 @@ class _MPageState extends State<MPage> with TickerProviderStateMixin {
 }
 
 class MClip extends CustomClipper<Rect> {
-  double w;
+  var w;
   int i;
 
   MClip(this.i, this.w);
