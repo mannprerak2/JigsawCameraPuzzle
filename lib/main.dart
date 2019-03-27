@@ -43,21 +43,28 @@ class _MPageState extends State<MPage> {
       }
       w = MediaQuery.of(context).size.width;
       r = 1 / contr.value.aspectRatio;
-      tutOver();
+      step = 0;
       setState(() {});
     });
-  }
-
-  void tutOver() async {
-    await Future.delayed(Duration(seconds: 4));
-    step = 1;
-    setState(() {});
   }
 
   @override
   void dispose() {
     contr?.dispose();
     super.dispose();
+  }
+
+  void checkEnd() async {
+    bool sorted = true;
+    for (int i = 1; i < tiles.length; i++) {
+      if (tiles[i - 1] < tiles[i]) continue;
+      sorted = false;
+      break;
+    }
+    if (sorted)
+      setState(() {
+        step = 2;
+      });
   }
 
   @override
@@ -117,52 +124,49 @@ class _MPageState extends State<MPage> {
             onPressed: () {
               setState(() {
                 step = 0;
-                tutOver();
               });
             },
           )
         ],
       );
     }
+    else if (step == 2) {
+      return Text(
+        "COngratulations!!\n",
+        textAlign: TextAlign.center,
+        style: TextStyle(color: Colors.white, fontSize: 25),
+      );
+    }
     return Container();
+  }
+
+  void onDragEnd(DragEndDetails d, i, swap) {
+    if (d.primaryVelocity > 0)
+      swap *= 1;
+    else
+      swap *= -1;
+
+    try {
+      int idx = tiles.indexOf(i);
+      tiles[idx] = tiles[idx + swap];
+      tiles[idx + swap] = i;
+
+      setState(() {
+        step = 1;
+        checkEnd();
+      });
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
   Widget tile(int i) {
     return GestureDetector(
-      onVerticalDragEnd: (DragEndDetails d) {
-        int swap;
-        if (d.primaryVelocity > 0)
-          swap = 4;
-        else
-          swap = -4;
-
-        try {
-          int idx = tiles.indexOf(i);
-          tiles[idx] = tiles[idx + swap];
-          tiles[idx + swap] = i;
-
-          setState(() {});
-        } catch (e) {
-          print(e.toString());
-        }
+      onVerticalDragEnd: (d) {
+        onDragEnd(d, i, 4);
       },
-      onHorizontalDragEnd: (DragEndDetails d) {
-        int swap;
-        if (d.primaryVelocity > 0)
-          swap = 1;
-        else
-          swap = -1;
-        print(swap);
-
-        try {
-          int idx = tiles.indexOf(i);
-          tiles[idx] = tiles[idx + swap];
-          tiles[idx + swap] = i;
-
-          setState(() {});
-        } catch (e) {
-          print(e.toString());
-        }
+      onHorizontalDragEnd: (d) {
+        onDragEnd(d, i, 1);
       },
       child: OverflowBox(
         alignment: Alignment((-1 + 2 * ((i % 4) / 3).toDouble()),
