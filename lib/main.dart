@@ -1,50 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:flutter/rendering.dart';
 
-List<CameraDescription> cameras;
-double ratio;
+List<CameraDescription> cams;
+double r;
 
 Future<void> main() async {
-  cameras = await availableCameras();
-  runApp(MyApp());
+  cams = await availableCameras();
+  runApp(App());
 }
 
-class MyApp extends StatelessWidget {
+class App extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(_) {
     return MaterialApp(
-      title: 'Jigsaw Cam',
       theme: ThemeData(
           primarySwatch: Colors.blue,
           iconTheme: IconThemeData(color: Colors.white)),
-      home: MyHomePage(),
+      home: MPage(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key}) : super(key: key);
+class MPage extends StatefulWidget {
+  MPage({Key key}) : super(key: key);
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _MPageState createState() => _MPageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  CameraController controller;
-  double width;
-  List<int> blocks = List<int>.generate(16, (i) => i)..shuffle();
+class _MPageState extends State<MPage> {
+  CameraController contr;
+  double w;
+  var tiles = List<int>.generate(16, (i) => i)..shuffle();
   int step = 0;
 
   @override
   void initState() {
     super.initState();
-    controller = CameraController(cameras[1], ResolutionPreset.medium);
-    controller.initialize().then((_) {
+    contr = CameraController(cams[1], ResolutionPreset.medium);
+    contr.initialize().then((_) {
       if (!mounted) {
         return;
       }
-      width = MediaQuery.of(context).size.width;
-      ratio = 1 / controller.value.aspectRatio;
+      w = MediaQuery.of(context).size.width;
+      r = 1 / contr.value.aspectRatio;
       tutOver();
       setState(() {});
     });
@@ -58,13 +56,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void dispose() {
-    controller?.dispose();
+    contr?.dispose();
     super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) {
-    if (!controller.value.isInitialized) return Container();
+  Widget build(context) {
+    if (!contr.value.isInitialized) return Container();
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -75,27 +73,26 @@ class _MyHomePageState extends State<MyHomePage> {
               itemCount: 16,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 4,
-                childAspectRatio: (1 / ratio).toDouble(),
+                childAspectRatio: 1 / r,
               ),
-              itemBuilder: (context, i) {
-                return buildPiece(blocks[i]);
+              itemBuilder: (c, i) {
+                return tile(tiles[i]);
               },
             ),
           ),
           Container(
-              padding: EdgeInsetsDirectional.only(bottom: 25),
-              child: buildBottomBar())
+              padding: EdgeInsetsDirectional.only(bottom: 25), child: btmBar())
         ],
       ),
     );
   }
 
-  Widget buildBottomBar() {
+  Widget btmBar() {
     if (step == 0) {
       return Text(
         "Oops... The camera is broken\n Fix it by swiping on tiles\n",
         textAlign: TextAlign.center,
-        style: TextStyle(color: Colors.white, fontSize: 20),
+        style: TextStyle(color: Colors.white, fontSize: 25),
       );
     } else if (step == 1) {
       return Row(
@@ -108,7 +105,7 @@ class _MyHomePageState extends State<MyHomePage> {
             iconSize: 50,
             onPressed: () {
               setState(() {
-                blocks.shuffle();
+                tiles.shuffle();
               });
             },
           ),
@@ -127,42 +124,45 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       );
     }
-
     return Container();
   }
 
-  Widget buildPiece(int i) {
+  Widget tile(int i) {
     return GestureDetector(
-      onVerticalDragEnd: (DragEndDetails drag) {
-        int swapWith;
-        if (drag.primaryVelocity > 0)
-          swapWith = 4;
+      onVerticalDragEnd: (DragEndDetails d) {
+        int swap;
+        if (d.primaryVelocity > 0)
+          swap = 4;
         else
-          swapWith = -4;
-        print(swapWith);
+          swap = -4;
+
         try {
-          int index = blocks.indexOf(i);
-          blocks[index] = blocks[index + swapWith];
-          blocks[index + swapWith] = i;
+          int idx = tiles.indexOf(i);
+          tiles[idx] = tiles[idx + swap];
+          tiles[idx + swap] = i;
 
           setState(() {});
-        } catch (e) {}
+        } catch (e) {
+          print(e.toString());
+        }
       },
-      onHorizontalDragEnd: (DragEndDetails drag) {
-        int swapWith;
-        if (drag.primaryVelocity > 0)
-          swapWith = 1;
+      onHorizontalDragEnd: (DragEndDetails d) {
+        int swap;
+        if (d.primaryVelocity > 0)
+          swap = 1;
         else
-          swapWith = -1;
-        print(swapWith);
+          swap = -1;
+        print(swap);
 
         try {
-          int index = blocks.indexOf(i);
-          blocks[index] = blocks[index + swapWith];
-          blocks[index + swapWith] = i;
+          int idx = tiles.indexOf(i);
+          tiles[idx] = tiles[idx + swap];
+          tiles[idx + swap] = i;
 
           setState(() {});
-        } catch (e) {}
+        } catch (e) {
+          print(e.toString());
+        }
       },
       child: OverflowBox(
         alignment: Alignment((-1 + 2 * ((i % 4) / 3).toDouble()),
@@ -170,11 +170,11 @@ class _MyHomePageState extends State<MyHomePage> {
         maxWidth: double.infinity,
         maxHeight: double.infinity,
         child: Container(
-          width: width,
-          height: width * ratio,
+          width: w,
+          height: w * r,
           child: ClipRect(
-            clipper: RectClipper(i, width / 4),
-            child: CameraPreview(controller),
+            clipper: MClip(i, w / 4),
+            child: CameraPreview(contr),
           ),
         ),
       ),
@@ -182,18 +182,15 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class RectClipper extends CustomClipper<Rect> {
+class MClip extends CustomClipper<Rect> {
   double w;
   int i;
 
-  RectClipper(this.i, this.w);
+  MClip(this.i, this.w);
 
   @override
-  bool shouldReclip(RectClipper oldClipper) => true;
+  bool shouldReclip(_) => true;
 
   @override
-  Rect getClip(Size size) {
-    Rect rect = Rect.fromLTWH((i % 4) * w, (i ~/ 4) * w * ratio, w, w * ratio);
-    return rect;
-  }
+  Rect getClip(_) => Rect.fromLTWH((i % 4) * w, (i ~/ 4) * w * r, w, w * r);
 }
