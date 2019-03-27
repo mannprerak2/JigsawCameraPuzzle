@@ -27,11 +27,15 @@ class MPage extends StatefulWidget {
   _MPageState createState() => _MPageState();
 }
 
-class _MPageState extends State<MPage> {
+class _MPageState extends State<MPage> with TickerProviderStateMixin {
   CameraController contr;
-  double w;
+  static double w;
   var tiles = List<int>.generate(16, (i) => i)..shuffle();
   int step = 0;
+
+  List<Tween> tw = List();
+  List<Animation> an = List();
+  List<AnimationController> anct = List();
 
   @override
   void initState() {
@@ -46,6 +50,23 @@ class _MPageState extends State<MPage> {
       step = 0;
       setState(() {});
     });
+    for (int i = 0; i < 16; i++) {
+      anct.add(AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 100),
+      ));
+      tw.add(Tween<Offset>(begin: Offset.zero, end: Offset(0, 1)));
+      an.add(tw[i].animate(anct[i]));
+      an[i].addStatusListener((AnimationStatus status) {
+        if (status == AnimationStatus.completed) {
+          setState(() {
+            anct[i].reset();
+            step = 1;
+            checkEnd();
+          });
+        }
+      });
+    }
   }
 
   @override
@@ -129,8 +150,7 @@ class _MPageState extends State<MPage> {
           )
         ],
       );
-    }
-    else if (step == 2) {
+    } else if (step == 2) {
       return Text(
         "COngratulations!!\n",
         textAlign: TextAlign.center,
@@ -151,34 +171,69 @@ class _MPageState extends State<MPage> {
       tiles[idx] = tiles[idx + swap];
       tiles[idx + swap] = i;
 
-      setState(() {
-        step = 1;
-        checkEnd();
-      });
+      switch (swap) {
+        case 1:
+          tw[idx].end = Offset(1, 0);
+          anct[idx].forward();
+          tw[idx + 1].end = Offset(-1, 0);
+          anct[idx + 1].forward();
+          break;
+        case -1:
+          tw[idx].end = Offset(-1, 0);
+          anct[idx].forward();
+          tw[idx - 1].end = Offset(1, 0);
+          anct[idx - 1].forward();
+          break;
+        case 4:
+          tw[idx].end = Offset(0, 1);
+          anct[idx].forward();
+          tw[idx + 4].end = Offset(0, -1);
+          anct[idx + 4].forward();
+          break;
+        case -4:
+          tw[idx].end = Offset(0, -1);
+          anct[idx].forward();
+          tw[idx - 4].end = Offset(0, 1);
+          anct[idx - 4].forward();
+          break;
+
+        //set state called after animation is completed
+      }
+      //swipe the animations as well
+      // var t1 = _switchTween[idx];
+      // _switchTween[idx] = _switchTween[idx + swap];
+      // _switchTween[idx + swap] = t1;
+
+      // var t2 = _switchAnimCont[idx];
+      // _switchAnimCont[idx] = _switchAnimCont[idx + swap];
+      // _switchAnimCont[idx + swap] = t2;
     } catch (e) {
       print(e.toString());
     }
   }
 
   Widget tile(int i) {
-    return GestureDetector(
-      onVerticalDragEnd: (d) {
-        onDragEnd(d, i, 4);
-      },
-      onHorizontalDragEnd: (d) {
-        onDragEnd(d, i, 1);
-      },
-      child: OverflowBox(
-        alignment: Alignment((-1 + 2 * ((i % 4) / 3).toDouble()),
-            (-1 + 2 * ((i ~/ 4) / 3)).toDouble()),
-        maxWidth: double.infinity,
-        maxHeight: double.infinity,
-        child: Container(
-          width: w,
-          height: w * r,
-          child: ClipRect(
-            clipper: MClip(i, w / 4),
-            child: CameraPreview(contr),
+    return SlideTransition(
+      position: an[tiles.indexOf(i)],
+      child: GestureDetector(
+        onVerticalDragEnd: (d) {
+          onDragEnd(d, i, 4);
+        },
+        onHorizontalDragEnd: (d) {
+          onDragEnd(d, i, 1);
+        },
+        child: OverflowBox(
+          alignment: Alignment((-1 + 2 * ((i % 4) / 3).toDouble()),
+              (-1 + 2 * ((i ~/ 4) / 3)).toDouble()),
+          maxWidth: double.infinity,
+          maxHeight: double.infinity,
+          child: Container(
+            width: w,
+            height: w * r,
+            child: ClipRect(
+              clipper: MClip(i, w / 4),
+              child: CameraPreview(contr),
+            ),
           ),
         ),
       ),
