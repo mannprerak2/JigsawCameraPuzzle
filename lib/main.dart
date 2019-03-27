@@ -62,8 +62,10 @@ class _MyHomePageState extends State<MyHomePage> {
           Expanded(
             child: GridView.builder(
               itemCount: 16,
-              gridDelegate:
-                  SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4,
+                childAspectRatio: (3 / 4).toDouble(),
+              ),
               itemBuilder: (context, i) {
                 return buildPiece(blocks[i]);
               },
@@ -117,7 +119,7 @@ class _MyHomePageState extends State<MyHomePage> {
         maxHeight: double.infinity,
         child: Container(
           width: width,
-          height: width,
+          height: width * 4 / 3,
           child: ClipRect(
             clipper: RectClipper(i, width / 4),
             child: CameraPreview(controller),
@@ -139,7 +141,7 @@ class RectClipper extends CustomClipper<Rect> {
 
   @override
   Rect getClip(Size size) {
-    Rect rect = Rect.fromLTWH((i % 4) * w, (i ~/ 4) * w, w, w);
+    Rect rect = Rect.fromLTWH((i % 4) * w, (i ~/ 4) * w * 4 / 3, w, w * 4 / 3);
     return rect;
   }
 }
