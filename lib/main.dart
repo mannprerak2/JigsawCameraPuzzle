@@ -16,8 +16,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Jigsaw Cam',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+          primarySwatch: Colors.blue,
+          iconTheme: IconThemeData(color: Colors.white)),
       home: MyHomePage(),
     );
   }
@@ -33,6 +33,7 @@ class _MyHomePageState extends State<MyHomePage> {
   CameraController controller;
   double width;
   List<int> blocks = List<int>.generate(16, (i) => i)..shuffle();
+  int step = 0;
 
   @override
   void initState() {
@@ -43,9 +44,16 @@ class _MyHomePageState extends State<MyHomePage> {
         return;
       }
       width = MediaQuery.of(context).size.width;
-      ratio = 1/controller.value.aspectRatio;
+      ratio = 1 / controller.value.aspectRatio;
+      tutOver();
       setState(() {});
     });
+  }
+
+  void tutOver() async {
+    await Future.delayed(Duration(seconds: 4));
+    step = 1;
+    setState(() {});
   }
 
   @override
@@ -59,6 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (!controller.value.isInitialized) return Container();
 
     return Scaffold(
+      backgroundColor: Colors.black,
       body: Column(
         children: <Widget>[
           Expanded(
@@ -73,12 +82,53 @@ class _MyHomePageState extends State<MyHomePage> {
               },
             ),
           ),
-          Text(
-            "Help! the Camera is broken, Can you fix it?\nSwipe on tiles to interchange them\n",
-          )
+          Container(
+              padding: EdgeInsetsDirectional.only(bottom: 25),
+              child: buildBottomBar())
         ],
       ),
     );
+  }
+
+  Widget buildBottomBar() {
+    if (step == 0) {
+      return Text(
+        "Oops... The camera is broken\n Fix it by swiping on tiles\n",
+        textAlign: TextAlign.center,
+        style: TextStyle(color: Colors.white, fontSize: 20),
+      );
+    } else if (step == 1) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          IconButton(
+            icon: Icon(
+              Icons.refresh,
+            ),
+            iconSize: 50,
+            onPressed: () {
+              setState(() {
+                blocks.shuffle();
+              });
+            },
+          ),
+          IconButton(
+            icon: Icon(
+              Icons.help_outline,
+            ),
+            iconSize: 50,
+            onPressed: () {
+              setState(() {
+                step = 0;
+                tutOver();
+              });
+            },
+          )
+        ],
+      );
+    }
+
+    return Container();
   }
 
   Widget buildPiece(int i) {
