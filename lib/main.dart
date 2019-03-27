@@ -56,13 +56,24 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     if (!controller.value.isInitialized) return Container();
 
-    return GridView.builder(
-      itemCount: 16,
-      gridDelegate:
-          SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
-      itemBuilder: (context, i) {
-        return buildPiece(blocks[i]);
-      },
+    return Scaffold(
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: GridView.builder(
+              itemCount: 16,
+              gridDelegate:
+                  SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
+              itemBuilder: (context, i) {
+                return buildPiece(blocks[i]);
+              },
+            ),
+          ),
+          Text(
+            "Help! the Camera is broken, Can you fix it?\nSwipe on tiles to interchange them\n",
+          )
+        ],
+      ),
     );
   }
 
