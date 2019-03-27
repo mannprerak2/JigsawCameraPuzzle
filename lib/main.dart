@@ -3,6 +3,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/rendering.dart';
 
 List<CameraDescription> cameras;
+double ratio;
 
 Future<void> main() async {
   cameras = await availableCameras();
@@ -42,6 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
         return;
       }
       width = MediaQuery.of(context).size.width;
+      ratio = 1/controller.value.aspectRatio;
       setState(() {});
     });
   }
@@ -64,7 +66,7 @@ class _MyHomePageState extends State<MyHomePage> {
               itemCount: 16,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 4,
-                childAspectRatio: (3 / 4).toDouble(),
+                childAspectRatio: (1 / ratio).toDouble(),
               ),
               itemBuilder: (context, i) {
                 return buildPiece(blocks[i]);
@@ -119,7 +121,7 @@ class _MyHomePageState extends State<MyHomePage> {
         maxHeight: double.infinity,
         child: Container(
           width: width,
-          height: width * 4 / 3,
+          height: width * ratio,
           child: ClipRect(
             clipper: RectClipper(i, width / 4),
             child: CameraPreview(controller),
@@ -141,7 +143,7 @@ class RectClipper extends CustomClipper<Rect> {
 
   @override
   Rect getClip(Size size) {
-    Rect rect = Rect.fromLTWH((i % 4) * w, (i ~/ 4) * w * 4 / 3, w, w * 4 / 3);
+    Rect rect = Rect.fromLTWH((i % 4) * w, (i ~/ 4) * w * ratio, w, w * ratio);
     return rect;
   }
 }
