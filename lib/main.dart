@@ -32,7 +32,6 @@ class _MyHomePageState extends State<MyHomePage> {
   CameraController controller;
   double width;
   List<int> blocks = List<int>.generate(16, (i) => i)..shuffle();
-  int swap = -1;
 
   @override
   void initState() {
@@ -69,22 +68,36 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Widget buildPiece(int i) {
     return GestureDetector(
-      onTap: () {
-        if (swap == -1) {
-          swap = blocks.indexOf(i);
-          return;
-        }
-        print("swap");
+      onVerticalDragEnd: (DragEndDetails drag) {
+        int swapWith;
+        if (drag.primaryVelocity > 0)
+          swapWith = 4;
+        else
+          swapWith = -4;
+        print(swapWith);
+        try {
+          int index = blocks.indexOf(i);
+          blocks[index] = blocks[index + swapWith];
+          blocks[index + swapWith] = i;
 
-        int t = blocks[swap];
-        blocks[blocks.indexOf(i)] = t;
-        blocks[swap] = i;
-        swap = -1;
-
-        setState(() {});
+          setState(() {});
+        } catch (e) {}
       },
       onHorizontalDragEnd: (DragEndDetails drag) {
-        if (drag.primaryVelocity > 0) {}
+        int swapWith;
+        if (drag.primaryVelocity > 0)
+          swapWith = 1;
+        else
+          swapWith = -1;
+        print(swapWith);
+
+        try {
+          int index = blocks.indexOf(i);
+          blocks[index] = blocks[index + swapWith];
+          blocks[index + swapWith] = i;
+
+          setState(() {});
+        } catch (e) {}
       },
       child: OverflowBox(
         alignment: Alignment((-1 + 2 * ((i % 4) / 3).toDouble()),
