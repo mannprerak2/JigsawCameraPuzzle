@@ -16,4 +16,7 @@ flutter run --release
 ```
 ### Dart code Byte count = 5100 bytes
 
+![gif](./GIF/gif.gif)
+
+
 <img src="https://upload.wikimedia.org/wikipedia/commons/1/17/Google-flutter-logo.png">
